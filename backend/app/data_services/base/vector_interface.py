@@ -4,7 +4,7 @@ from typing import Dict, List, Optional
 
 class VectorSearchService(ABC):
     @abstractmethod
-    async def insert_item_vector(self, item_id: str, vector: List[float], payload: Dict) -> None:
+    async def insert_item_vector(self, item_id: int, vector: List[float], payload: Dict) -> None:
         """
         Insert an item vector with associated metadata payload.
         """

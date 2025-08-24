@@ -12,12 +12,12 @@ class Settings:
     # Qdrant
     QDRANT_URL: str = os.getenv("QDRANT_URL", "")
     QDRANT_API_KEY: str = os.getenv("QDRANT_API_KEY", "")
-    QDRANT_COLLECTION: str = os.getenv("QDRANT_COLLECTION", "your_collection_name")
+    QDRANT_COLLECTION: str = os.getenv("QDRANT_COLLECTION", "items")
 
     # Supabase
     SUPABASE_PROJECT_URL: str = os.getenv("SUPABASE_PROJECT_URL", "")
     SUPABASE_KEY: str = os.getenv("SUPABASE_SERVICE_KEY", "")
-    SUPABASE_BUCKET: str = os.getenv("SUPABASE_BUCKET", "found-item-images")
+    SUPABASE_BUCKET: str = os.getenv("SUPABASE_BUCKET", "found_item_images")
     SUPABASE_DB_DIRECT_URL: str = os.getenv("SUPABASE_DB_DIRECT_URL", "")
     SUPABASE_DB_POOLER_URL: str = os.getenv("SUPABASE_DB_POOLER_URL", "")
 

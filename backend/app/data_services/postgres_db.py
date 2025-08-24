@@ -12,17 +12,23 @@ class PostgresRepository(ItemRepository):
     def __init__(self, db: Database):
         self._db = db
 
-    # --------------------
-    # Found items
-    # --------------------
     async def insert_found_item(self, item_data: Dict) -> str:
+        item_id = str(uuid.uuid4())
         try:
-            item_id = str(uuid.uuid4())
             async with self._db.get_connection() as conn:
                 await conn.execute(
                     """
-                    INSERT INTO found_items (id, finder_user_id, image_bucket, image_path,
-                                              caption_text, caption_model, found_at, location_hint, status)
+                    INSERT INTO found_items (
+                        id, 
+                        finder_user_id, 
+                        image_bucket, 
+                        image_path,
+                        caption_text, 
+                        caption_model, 
+                        found_at, 
+                        location_hint, 
+                        status
+                    )
                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
                     """,
                     item_id,
@@ -31,7 +37,7 @@ class PostgresRepository(ItemRepository):
                     item_data["image_path"],
                     item_data["caption_text"],
                     item_data.get("caption_model"),
-                    item_data.get("found_at"),        # must be UTC aware if not null
+                    item_data.get("found_at"),
                     item_data.get("location_hint"),
                     item_data.get("status", "active"),
                 )
@@ -45,10 +51,20 @@ class PostgresRepository(ItemRepository):
             async with self._db.get_connection() as conn:
                 row = await conn.fetchrow(
                     """
-                    SELECT id, finder_user_id, image_bucket, image_path,
-                           caption_text, caption_model, found_at, location_hint, status,
-                           created_at, updated_at
-                    FROM found_items WHERE id = $1
+                    SELECT 
+                        id, 
+                        finder_user_id, 
+                        image_bucket, 
+                        image_path,
+                        caption_text, 
+                        caption_model, 
+                        found_at, 
+                        location_hint, 
+                        status,
+                        created_at, 
+                        updated_at
+                    FROM found_items
+                    WHERE id = $1
                     """,
                     item_id,
                 )
@@ -57,23 +73,26 @@ class PostgresRepository(ItemRepository):
             logger.error(f"Failed to get found item {item_id}: {e}")
             raise
 
-    # --------------------
-    # Lost reports
-    # --------------------
     async def insert_lost_report(self, report_data: Dict) -> str:
+        report_id = str(uuid.uuid4())
         try:
-            report_id = str(uuid.uuid4())
             async with self._db.get_connection() as conn:
                 await conn.execute(
                     """
-                    INSERT INTO lost_reports (id, reporter_user_id, description_text,
-                                               lost_at, location_hint, status)
+                    INSERT INTO lost_reports (
+                        id, 
+                        reporter_user_id, 
+                        description_text,
+                        lost_at, 
+                        location_hint, 
+                        status
+                    )
                     VALUES ($1, $2, $3, $4, $5, $6)
                     """,
                     report_id,
                     report_data.get("reporter_user_id"),
                     report_data["description_text"],
-                    report_data.get("lost_at"),       # must be UTC aware if not null
+                    report_data.get("lost_at"),
                     report_data.get("location_hint"),
                     report_data.get("status", "open"),
                 )
@@ -84,13 +103,20 @@ class PostgresRepository(ItemRepository):
 
     async def get_lost_report_by_id(self, report_id: str) -> Optional[Dict]:
         try:
-            async with self._db.acquire() as conn:
+            async with self._db.get_connection() as conn:
                 row = await conn.fetchrow(
                     """
-                    SELECT id, reporter_user_id, description_text,
-                           lost_at, location_hint, status,
-                           created_at, updated_at
-                    FROM lost_reports WHERE id = $1
+                    SELECT 
+                        id, 
+                        reporter_user_id, 
+                        description_text,
+                        lost_at, 
+                        location_hint, 
+                        status,
+                        created_at, 
+                        updated_at
+                    FROM lost_reports
+                    WHERE id = $1
                     """,
                     report_id,
                 )
@@ -99,25 +125,28 @@ class PostgresRepository(ItemRepository):
             logger.error(f"Failed to get lost report {report_id}: {e}")
             raise
 
-    # --------------------
-    # Matches
-    # --------------------
     async def insert_matches(self, matches: List[Dict]) -> None:
         if not matches:
             return
         try:
-            async with self._db.acquire() as conn:
+            async with self._db.get_connection() as conn:
                 async with conn.transaction():
                     await conn.executemany(
                         """
-                        INSERT INTO matches (id, found_item_id, lost_report_id, score, method)
+                        INSERT INTO matches (
+                            id, 
+                            found_item_id, 
+                            lost_report_id, 
+                            score, 
+                            method
+                        )
                         VALUES ($1, $2, $3, $4, $5)
                         """,
                         [
                             (
                                 str(uuid.uuid4()),
                                 m["found_item_id"],
-                                m["lost_report_id"],  # ✅ not "lost_item_id"
+                                m["lost_report_id"],
                                 m["score"],
                                 m.get("method"),
                             )

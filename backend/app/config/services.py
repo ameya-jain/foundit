@@ -6,11 +6,14 @@ from app.data_services.base.postgres_db_interface import ItemRepository
 from app.data_services.base.storage_interface import ImageStorageService
 from app.data_services.base.vector_interface import VectorSearchService
 
-from app.data_services.postgrest_db import PostgresRepository
+from app.data_services.postgres_db import PostgresRepository
 from app.data_services.supabase_storage import SupabaseStorageService
 from app.data_services.qdrant_service import QdrantVectorService
 
 from app.infra.database import db
+from app.infra.supabase_client import supabase_client
+from app.infra.qdrant_client import qdrant_client
+from app.infra.openai_client import openai_client
 
 logger = logging.getLogger(__name__)
 
@@ -25,12 +28,18 @@ class Services:
     async def start(self):
         try:
             await db.init()
+            supabase_client.init()
+            await qdrant_client.init()
+            await openai_client.init()
         except Exception as e:
             logger.error(f"Failed to initialize services: {e}")
             raise
     
     async def stop(self):
         await db.close()
+        supabase_client.close()
+        await qdrant_client.close()
+        await openai_client.close()
 
     @property
     def image_service(self) -> ImageProcessingService:

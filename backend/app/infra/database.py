@@ -38,10 +38,10 @@ class Database:
                     max_size=settings.DB_POOL_SIZE
                 )
                 self._active_dsn = dsn
-                logger.info(f"Successfully connected to database using: {dsn[:50]}...")
+                logger.info(f"Successfully connected to database using: {dsn[:35]}...")
                 return
             except Exception as e:
-                error_message = f"Failed to connect to database using {dsn[:50]}...: {e}"
+                error_message = f"Failed to connect to database using {dsn[:35]}...: {e}"
                 logger.warning(error_message)
                 connection_errors.append(error_message)
         
